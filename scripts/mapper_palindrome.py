@@ -21,23 +21,21 @@ def is_palindrome(s: str):
         i, j = i+1, j-1
     return True
 
-
 for line in sys.stdin: 
     line = line.strip()
     review = json.loads(line)
-    
+
     # extract review text
-    review_text : str= review['reviewText']
+    review_text : str = review['reviewText']
     review_text = review_text.strip()
-    cleaned_review_text = ""
     
     # extract words from the review text
-    review_text_words = review_text_words.split(review_text)
+    review_text_words = review_text.split()
 
     # check for palindromes and write to stdout if palindrome is found
     for word in review_text_words:
         # remove special characters from the word
         cleaned_word = ''.join(e for e in word if e.isalnum())
-        
+
         if is_palindrome(cleaned_word):
             print(cleaned_word)
