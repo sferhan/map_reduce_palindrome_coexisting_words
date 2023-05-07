@@ -3,8 +3,13 @@
 import sys
 import json
 
+
 def is_palindrome(s: str):
-    if not s or s == ".":
+    """
+    Checks if the string @s is a palindrome.
+    Returns False if @s is empty or non-palindrome, True otherwise
+    """
+    if not s:
         return False
     i = 0
     j = s.__len__()-1
@@ -24,9 +29,15 @@ for line in sys.stdin:
     # extract review text
     review_text : str= review['reviewText']
     review_text = review_text.strip()
+    cleaned_review_text = ""
     
     # extract words from the review text
     review_text_words = review_text_words.split(review_text)
+
+    # check for palindromes and write to stdout if palindrome is found
     for word in review_text_words:
-        if is_palindrome(review_text):
-            print(word)
+        # remove special characters from the word
+        cleaned_word = ''.join(e for e in word if e.isalnum())
+        
+        if is_palindrome(cleaned_word):
+            print(cleaned_word)
