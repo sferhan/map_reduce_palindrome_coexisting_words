@@ -13,9 +13,18 @@ def get_cooccuring_words_in_sentence(sentence: str):
     cleaned_words = []
     
     for word in words:
-        # remove special characters from the word
-        cleaned_word = ''.join(e for e in word if e.isalnum())
-        cleaned_words.append(cleaned_word)
+        # ignore the . at the end of a sentence
+        if word.endswith("."):
+            word = word[:-1]
+
+        alphabets_only = True
+        for c in word:
+            if not c.isalpha():
+                alphabets_only = False
+        
+        # word must be all alphabets
+        if word and alphabets_only:
+            cleaned_words.append(word)
     
     co_occuring = []
     

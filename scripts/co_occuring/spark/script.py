@@ -2,6 +2,7 @@
 
 from pyspark.sql import SparkSession
 import json
+import argparse
 
 
 def get_cooccuring_words_in_sentence(sentence: str):
@@ -13,9 +14,18 @@ def get_cooccuring_words_in_sentence(sentence: str):
     cleaned_words = []
     
     for word in words:
-        # remove special characters from the word
-        cleaned_word = ''.join(e for e in word if e.isalnum())
-        cleaned_words.append(cleaned_word)
+        # ignore the . at the end of a sentence
+        if word.endswith("."):
+            word = word[:-1]
+
+        alphabets_only = True
+        for c in word:
+            if not c.isalpha():
+                alphabets_only = False
+        
+        # word must be all alphabets
+        if word and alphabets_only:
+            cleaned_words.append(word)
     
     co_occuring = []
     
@@ -34,11 +44,19 @@ def get_cooccuring_words_in_sentence(sentence: str):
             co_occuring.append((word1, word2))
     return co_occuring
 
+
+parser = argparse.ArgumentParser(description="Apache Spark script for finding all co-occuring words from amazon customer reviews data-set file")
+
+parser.add_argument("input", help="Path of the input file. File must be a from the Amazon Customer Review dataset(Each line a json field with a 'reviewText' string field)")
+parser.add_argument("output", help="Path of the output file.")
+
+args = parser.parse_args()
+
 # Create a SparkSession object
 spark = SparkSession.builder.appName("CoOccuringWordCount").getOrCreate()
 
 # Read the input file into an RDD
-lines = spark.sparkContext.textFile("gs://cc-mapreduce-project/dataset/sample.txt")
+lines = spark.sparkContext.textFile(args.input)
 
 cooccuring_frequencies = {}
 
@@ -71,7 +89,7 @@ for line in lines.collect():
 # write the final palindrome frequencies to a file on GCS
 spark.sparkContext.parallelize(
     cooccuring_frequencies.items()
-).map(lambda x: f"{x[0]}\t\t{x[1]}").saveAsTextFile("gs://cc-mapreduce-project/output/spark_cooccuring_words.txt")
+).map(lambda x: f"{x[0]}\t\t{x[1]}").saveAsTextFile(args.output)
 
 # Stop the SparkSession
 spark.stop()

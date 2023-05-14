@@ -2,6 +2,7 @@
 
 from pyspark.sql import SparkSession
 import json
+import argparse
 
 
 def is_palindrome(s: str):
@@ -21,11 +22,18 @@ def is_palindrome(s: str):
         i, j = i+1, j-1
     return True
 
+parser = argparse.ArgumentParser(description="Apache Spark script for finding all palindromes from amazon customer reviews data-set file")
+
+parser.add_argument("--input", help="Path of the input file. File must be a from the Amazon Customer Review dataset(Each line a json field with a 'reviewText' string field)")
+parser.add_argument("--output", help="Path of the output file.")
+
+args = parser.parse_args()
+
 # Create a SparkSession object
 spark = SparkSession.builder.appName("WordCount").getOrCreate()
 
 # Read the input file into an RDD
-lines = spark.sparkContext.textFile("gs://cc-mapreduce-project/dataset/sample.txt")
+lines = spark.sparkContext.textFile(args.input)
 
 palindrome_frequencies = {}
 
@@ -53,7 +61,7 @@ for line in lines.collect():
 # write the final palindrome frequencies to a file on GCS
 spark.sparkContext.parallelize(
     palindrome_frequencies.items()
-).map(lambda x: f"{x[0]}\t\t{x[1]}").saveAsTextFile("gs://cc-mapreduce-project/output/spark_palindromes.txt")
+).map(lambda x: f"{x[0]}\t\t{x[1]}").saveAsTextFile(args.output)
 
 # Stop the SparkSession
 spark.stop()
