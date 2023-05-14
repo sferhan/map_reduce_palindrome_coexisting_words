@@ -34,8 +34,10 @@ for line in sys.stdin:
 
     # check for palindromes and write to stdout if palindrome is found
     for word in review_text_words:
-        # remove special characters from the word
-        cleaned_word = ''.join(e for e in word if e.isalnum())
+        # ignore the . at the end of a sentence
+        # but avoid ignoring a sequence of characters like ...
+        if word.endswith(".") and not word.startswith("."):
+            word = word[:-1]
 
-        if is_palindrome(cleaned_word):
-            print(cleaned_word)
+        if is_palindrome(word):
+            print(word)
