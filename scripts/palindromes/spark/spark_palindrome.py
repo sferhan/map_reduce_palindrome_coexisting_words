@@ -42,10 +42,12 @@ for line in lines.collect():
 
     # check for palindromes and update palindrome_frequencies if palindrome is found
     for word in review_text_words:
-        # remove special characters from the word
-        cleaned_word = ''.join(e for e in word if e.isalnum())
+        # ignore the . at the end of a sentence
+        # but avoid ignoring a sequence of characters like ...
+        if word.endswith(".") and not word.startswith("."):
+            word = word[:-1]
 
-        if is_palindrome(cleaned_word):
+        if is_palindrome(word):
             palindrome_frequencies[word] = palindrome_frequencies.get(word, 0) + 1
 
 # write the final palindrome frequencies to a file on GCS
