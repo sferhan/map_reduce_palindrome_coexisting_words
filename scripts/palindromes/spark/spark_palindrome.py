@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
-import sys
+from pyspark.sql import SparkSession
 import json
 
 
@@ -21,7 +21,15 @@ def is_palindrome(s: str):
         i, j = i+1, j-1
     return True
 
-for line in sys.stdin: 
+# Create a SparkSession object
+spark = SparkSession.builder.appName("WordCount").getOrCreate()
+
+# Read the input file into an RDD
+lines = spark.sparkContext.textFile("gs://cc-mapreduce-project/dataset/sample.txt")
+
+palindrome_frequencies = {}
+
+for line in lines.collect(): 
     line = line.strip()
     review = json.loads(line)
 
@@ -32,10 +40,18 @@ for line in sys.stdin:
     # extract words from the review text
     review_text_words = review_text.split()
 
-    # check for palindromes and write to stdout if palindrome is found
+    # check for palindromes and update palindrome_frequencies if palindrome is found
     for word in review_text_words:
         # remove special characters from the word
         cleaned_word = ''.join(e for e in word if e.isalnum())
 
         if is_palindrome(cleaned_word):
-            print(cleaned_word)
+            palindrome_frequencies[word] = palindrome_frequencies.get(word, 0) + 1
+
+# write the final palindrome frequencies to a file on GCS
+spark.sparkContext.parallelize(
+    palindrome_frequencies.items()
+).map(lambda x: f"{x[0]}\t\t{x[1]}").saveAsTextFile("gs://cc-mapreduce-project/output/spark_palindromes.txt")
+
+# Stop the SparkSession
+spark.stop()

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 import sys
 
@@ -12,4 +12,4 @@ for word in sys.stdin:
 
 # write the final palindrome frequencies to stdout
 for palindrome, count in palindrome_frequencies.items():
-        print(f"{palindrome}\t2{count}")
+        print(f"{palindrome}\t\t{count}")
